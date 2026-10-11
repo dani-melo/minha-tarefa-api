@@ -1,10 +1,14 @@
-
+import cors from "cors";
 import express from "express";
 import disciplinasRoutes from "./routes/disciplinas.routes";
 import tarefasRoutes from "./routes/tarefas.routes";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+
+app.use(cors({
+  origin: "http://localhost:5173"
+}));
 
 app.use(express.json());
 
