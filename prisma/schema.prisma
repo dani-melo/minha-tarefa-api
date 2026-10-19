@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -13,7 +12,13 @@ model Disciplina {
   nome         String
   cargaHoraria Int
 
+
   tarefas      Tarefa[]
+
+  
+  usuarioId Int?
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id])
+
 }
 
 model Tarefa {
@@ -24,6 +29,16 @@ model Tarefa {
   prioridade   String   @default("Media")
   status       String   @default("Pendente")
 
+
   disciplinaId Int
   disciplina   Disciplina @relation(fields: [disciplinaId], references: [id])
+}
+
+
+model Usuario {
+  id          Int      @id @default(autoincrement())
+  googleId    String   @unique
+  nome        String
+  email       String   @unique
+  disciplinas Disciplina[]
 }
