@@ -20,10 +20,13 @@ router.post("/", async (request, response) => {
       return;
     }
 
+    const usuarioId = response.locals.usuarioId as number;
+
     const disciplina = await prisma.disciplina.create({
       data: {
         nome: nome.trim(),
         cargaHoraria,
+        usuarioId,
       },
     });
 
@@ -41,11 +44,16 @@ router.post("/", async (request, response) => {
 // API-02 — Consultar disciplinas
 router.get("/", async (_request, response) => {
   try {
+    const usuarioId = response.locals.usuarioId as number;
+
     const disciplinas = await prisma.disciplina.findMany({
+      where: {
+        usuarioId,
+      },
       orderBy: {
         id: "asc",
       },
-    });
+});
 
     response.status(200).json(disciplinas);
   } catch (error) {
@@ -72,8 +80,13 @@ router.put("/:id", async (request, response) => {
       return;
     }
 
-    const disciplinaExistente = await prisma.disciplina.findUnique({
-      where: { id },
+    const usuarioId = response.locals.usuarioId as number;
+
+    const disciplinaExistente = await prisma.disciplina.findFirst({
+      where: {
+        id,
+        usuarioId,
+      },
     });
 
     if (!disciplinaExistente) {
@@ -103,7 +116,10 @@ router.put("/:id", async (request, response) => {
     }
 
     const disciplinaAtualizada = await prisma.disciplina.update({
-      where: { id },
+      where: {
+        id,
+        usuarioId,
+      },
       data: {
         ...(nome !== undefined && { nome: nome.trim() }),
         ...(cargaHoraria !== undefined && { cargaHoraria }),
@@ -120,8 +136,6 @@ router.put("/:id", async (request, response) => {
   }
 });
 
-
-
 // API-04 — Excluir disciplina
 router.delete("/:id", async (request, response) => {
   try {
@@ -134,8 +148,13 @@ router.delete("/:id", async (request, response) => {
       return;
     }
 
-    const disciplina = await prisma.disciplina.findUnique({
-      where: { id },
+    const usuarioId = response.locals.usuarioId as number;
+
+    const disciplina = await prisma.disciplina.findFirst({
+      where: {
+        id,
+        usuarioId,
+      },
     });
 
     if (!disciplina) {
@@ -157,7 +176,10 @@ router.delete("/:id", async (request, response) => {
     }
 
     await prisma.disciplina.delete({
-      where: { id },
+      where: {
+        id,
+        usuarioId,
+      },
     });
 
     response.status(200).json({
