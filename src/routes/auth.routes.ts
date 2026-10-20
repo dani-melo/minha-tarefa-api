@@ -1,4 +1,4 @@
-
+import jwt from "jsonwebtoken";
 import { Router } from "express";
 import { OAuth2Client } from "google-auth-library";
 import { prisma } from "../lib/prisma";
@@ -6,6 +6,12 @@ import { prisma } from "../lib/prisma";
 const router = Router();
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
+
+const jwtSecret = process.env.JWT_SECRET;
+
+if (!jwtSecret) {
+  throw new Error("JWT_SECRET não configurado no .env");
+}
 
 if (!googleClientId) {
   throw new Error("GOOGLE_CLIENT_ID não configurado no .env");
@@ -53,14 +59,22 @@ router.post("/google", async (request, response) => {
       },
     });
 
-    return response.status(200).json({
-      mensagem: "Autenticação realizada com sucesso.",
-      usuario: {
-        id: usuario.id,
-        nome: usuario.nome,
-        email: usuario.email,
-      },
-    });
+    const token = jwt.sign(
+      { usuarioId: usuario.id },
+        jwtSecret,
+        { expiresIn: "2h" }
+    );
+
+        return response.status(200).json({
+                mensagem: "Autenticação realizada com sucesso.",
+                token,
+                usuario: {
+                    id: usuario.id,
+                    nome: usuario.nome,
+                    email: usuario.email,
+                },
+        });
+
   } catch (error) {
     console.error("Erro na autenticação Google:", error);
 
